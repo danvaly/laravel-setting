@@ -1,5 +1,5 @@
 {
-    "name": "danvaly/setting",
+    "name": "danvaly/laravel-setting",
     "description": "Persistent settings package for Laravel.",
     "keywords": [
         "laravel",

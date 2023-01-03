@@ -1,14 +1,17 @@
 # Persistent settings package for Laravel
 
 This package allows you to save settings in a more persistent way. You can use the database and/or json file to save your settings. You can also override the Laravel config.
+This is a fork from akaunting/laravel-setting
 
 * Driver support
 * Helper function
 * Blade directive
 * Override config values
+* Encryption
 * Custom file, table and columns
 * Auto save
 * Extra columns
+* Cache support
 
 ## Getting Started
 
@@ -17,10 +20,16 @@ This package allows you to save settings in a more persistent way. You can use t
 Run the following command:
 
 ```bash
-composer require Danvaly/setting
+composer require danvaly/laravel-setting
 ```
 
-### 2. Configuration
+### 2. Register (for Laravel < 5.5)
+
+Register the service provider in `config/app.php`
+
+```php
+Danvaly\Setting\Provider::class,
+```
 
 Add alias if you want to use the facade.
 
@@ -36,8 +45,15 @@ Publish config file.
 php artisan vendor:publish --tag=setting
 ```
 
+### 4. Database
 
-### 4. Configure
+Create table for database driver
+
+```bash
+php artisan migrate
+```
+
+### 5. Configure
 
 You can change the options of your app from `config/setting.php` file
 
@@ -73,7 +89,32 @@ If you enable the `auto_save` option in the config file, settings will be saved 
 
 ### Blade Directive
 
-You can get the settings directly in your blade templates using the helper method or the blade directive like `@setting('foo')` or `@setting('foo', 'default')`
+You can get the settings directly in your blade templates using the helper method or the blade directive like `@setting('foo')`
+
+### Override Config Values
+
+You can easily override default config values by adding them to the `override` option in `config/setting.php`, thereby eliminating the need to modify the default config files and also allowing you to change said values during production. Ex:
+
+```php
+'override' => [
+    "app.name" => "app_name",
+    "app.env" => "app_env",
+    "mail.driver" => "app_mail_driver",
+    "mail.host" => "app_mail_host",
+],
+```
+
+The values on the left corresponds to the respective config value (Ex: config('app.name')) and the value on the right is the name of the `key` in your settings table/json file.
+
+### Encryption
+
+If you like to encrypt the values for a given key, you can pass the key to the `encrypted_keys` option in `config/setting.php` and the rest is automatically handled by using Laravel's built-in encryption facilities. Ex:
+
+```php
+'encrypted_keys' => [
+    "payment.key",
+],
+```
 
 ### JSON Storage
 
@@ -115,29 +156,7 @@ class MyDriver extends Danvaly\Setting\Contracts\Driver
 	// ...
 }
 
-setting()->extend('mystore', function($app) {
-	return $app->make('MyStore');
+app('setting.manager')->extend('mydriver', function($app) {
+	return $app->make('MyDriver');
 });
 ```
-
-## Changelog
-
-Please see [Releases](../../releases) for more information what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-## Security
-
-If you discover any security related issues, please email security@Danvaly.com instead of using the issue tracker.
-
-## Credits
-
-- [Denis Duliçi](https://github.com/denisdulici)
-- [Andreas Lutro](https://github.com/anlutro)
-- [All Contributors](../../contributors)
-
-## License
-
-The MIT License (MIT). Please see [LICENSE](LICENSE.md) for more information.
